@@ -47,27 +47,20 @@ parseTime' (h1:h2:xs) = validateTime (hours, parseMinutes xs)
 parseTime :: [Char] -> Maybe Time
 parseTime t = validateInput t >>= parseTime'
 
--- how many minutes into the day we are
-toMinutes (hours, minutes) = hours * 60 + minutes
-
 -- |Difference between two times. If the second time is smaller than
 -- the first, it is considered to lie in the next day
-timeDifference :: Time -> Time -> Integer
+timeDifference :: Time -> Time -> Time
 timeDifference t1 t2@(h2, m2)
   | ts2 < ts1 = timeDifference t1 (h2 + 24, m2)
-  | otherwise = ts2 - ts1
+  | otherwise = toTime (ts2 - ts1)
   where
     ts2 = toMinutes t2
     ts1 = toMinutes t1
-
--- |Split a time difference from minutes to hours + minutes
-toTime :: Integer -> Time
-toTime t = divMod t 60
+    toMinutes (h, m) = h * 60 + m -- how many minutes into the day we are
+    toTime t = divMod t 60 -- minutes back to hours + minutes
 
 reportElapsed' (h, m) = "Time elapsed: " ++ show h ++ "h" ++ show m ++ "m"
-reportElapsed t1 t2 = reportElapsed' $ toTime elapsed
-  where
-    elapsed = timeDifference t1 t2
+reportElapsed t1 t2 = reportElapsed' $ timeDifference t1 t2
 
 formatReport Nothing _ = "Invalid start time"
 formatReport _ Nothing = "Invalid end time"
