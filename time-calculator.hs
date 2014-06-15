@@ -69,12 +69,9 @@ reportElapsed t1 t2 = reportElapsed' $ toTime elapsed
   where
     elapsed = timeDifference t1 t2
 
-printReport (Just s) = s
-printReport Nothing = "There was some invalid input"
-
--- fmap for two args
-fmap2 f (Just a) (Just b) = Just (f a b)
-fmap2 _ _ _               = Nothing
+formatReport Nothing _ = "Invalid start time"
+formatReport _ Nothing = "Invalid end time"
+formatReport (Just t1) (Just t2) = reportElapsed t1 t2
 
 getInput :: String -> IO String
 getInput s = do
@@ -88,5 +85,5 @@ main = do
   let t1 = parseTime s1
   s2 <- getInput "> "
   let t2 = parseTime s2
-  putStrLn $ printReport $ fmap2 reportElapsed t1 t2
+  putStrLn $ formatReport t1 t2
   main
