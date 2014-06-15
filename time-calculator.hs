@@ -27,7 +27,7 @@ validateInput :: [Char] -> Maybe [Char]
 validateInput xs
   | length xs == 4 = Just xs
   | length xs == 5 = Just xs
-  | otherwise    = Nothing
+  | otherwise      = Nothing
 
 validateTime :: Time -> Maybe Time
 validateTime time@(hours, minutes)
@@ -36,8 +36,8 @@ validateTime time@(hours, minutes)
   | otherwise             = Nothing
 
 parseMinutes :: [Char] -> Integer
-parseMinutes (':':m1:m2:[]) = parseMinutes [m1, m2]
-parseMinutes (m1:m2:[]) = read [m1, m2]
+parseMinutes (':':xs) = parseMinutes xs
+parseMinutes m@(m1:m2:[]) = read m
 
 parseTime' :: [Char] -> Maybe Time
 parseTime' (h1:h2:xs) = validateTime (hours, parseMinutes xs)
@@ -53,7 +53,7 @@ toMinutes (hours, minutes) = hours * 60 + minutes
 oneDay = toMinutes (24, 0)
 
 timeDifference' t1 t2
-  | t2 < t1 = timeDifference' t1 (t2 + oneDay)
+  | t2 < t1   = timeDifference' t1 (t2 + oneDay)
   | otherwise = t2 - t1
 
 -- |Difference between two times. If the second time is smaller than
