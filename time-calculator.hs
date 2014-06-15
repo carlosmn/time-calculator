@@ -50,32 +50,31 @@ parseTime t = validateInput t >>= parseTime'
 -- how many minutes into the day we are
 toMinutes (hours, minutes) = hours * 60 + minutes
 
-oneDay = toMinutes (24, 0)
-
-timeDifference' t1 t2
-  | t2 < t1   = timeDifference' t1 (t2 + oneDay)
-  | otherwise = t2 - t1
-
 -- |Difference between two times. If the second time is smaller than
 -- the first, it is considered to lie in the next day
-timeDifference :: Maybe Time -> Maybe Time -> Maybe Integer
-timeDifference (Just t1) (Just t2) = Just (timeDifference' ts1 ts2)
+timeDifference :: Time -> Time -> Integer
+timeDifference t1 t2@(h2, m2)
+  | ts2 < ts1 = timeDifference t1 (h2 + 24, m2)
+  | otherwise = ts2 - ts1
   where
     ts2 = toMinutes t2
     ts1 = toMinutes t1
-timeDifference _ _ = Nothing
 
 -- |Split a time difference from minutes to hours + minutes
 toTime :: Integer -> Time
 toTime t = divMod t 60
 
 reportElapsed' (h, m) = "Time elapsed: " ++ show h ++ "h" ++ show m ++ "m"
-reportElapsed t1 t2 = fmap (reportElapsed' . toTime) elapsed
+reportElapsed t1 t2 = reportElapsed' $ toTime elapsed
   where
     elapsed = timeDifference t1 t2
 
 printReport (Just s) = s
 printReport Nothing = "There was some invalid input"
+
+-- fmap for two args
+fmap2 f (Just a) (Just b) = Just (f a b)
+fmap2 _ _ _               = Nothing
 
 getInput :: String -> IO String
 getInput s = do
@@ -89,5 +88,5 @@ main = do
   let t1 = parseTime s1
   s2 <- getInput "> "
   let t2 = parseTime s2
-  putStrLn $ printReport $ t1 >> t2 >> reportElapsed t1 t2
+  putStrLn $ printReport $ fmap2 reportElapsed t1 t2
   main
