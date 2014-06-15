@@ -22,7 +22,7 @@ import System.IO (hFlush, stdout)
 
 type Time = (Integer, Integer)
 
--- Make sure we have hhmm or hh:mm format
+-- |Make sure we have hhmm or hh:mm format
 validateInput :: [Char] -> Maybe [Char]
 validateInput xs
   | length xs == 4 = Just xs
@@ -35,14 +35,21 @@ validateTime time@(hours, minutes)
     elem minutes [0..59]  = Just time
   | otherwise             = Nothing
 
-parseMinutes :: [Char] -> Integer
+parseDigits num@(a:b:[])
+  | isDigit a && isDigit b = Just (read num)
+  | otherwise              = Nothing
+
+isDigit x = elem x ['0'..'9']
+
+parseMinutes :: [Char] -> Maybe Integer
 parseMinutes (':':xs) = parseMinutes xs
-parseMinutes m@(m1:m2:[]) = read m
+parseMinutes xs       = parseDigits xs
 
 parseTime' :: [Char] -> Maybe Time
-parseTime' (h1:h2:xs) = validateTime (hours, parseMinutes xs)
-  where
-    hours = read [h1, h2] :: Integer
+parseTime' (h1:h2:xs) = do
+    hours   <- parseDigits [h1, h2]
+    minutes <- parseMinutes xs
+    validateTime (hours, minutes)
 
 parseTime :: [Char] -> Maybe Time
 parseTime t = validateInput t >>= parseTime'
