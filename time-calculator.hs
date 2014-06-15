@@ -19,6 +19,7 @@
 -- THE SOFTWARE.
 
 import System.IO (hFlush, stdout)
+import Text.Printf (printf)
 
 type Time = (Integer, Integer)
 
@@ -46,10 +47,11 @@ parseMinutes (':':xs) = parseMinutes xs
 parseMinutes xs       = parseDigits xs
 
 parseTime' :: [Char] -> Maybe Time
-parseTime' (h1:h2:xs) = do
-    hours   <- parseDigits [h1, h2]
-    minutes <- parseMinutes xs
-    validateTime (hours, minutes)
+parseTime' xs = do
+  let (h, m) = splitAt 2 xs
+  hours   <- parseDigits h
+  minutes <- parseMinutes m
+  validateTime (hours, minutes)
 
 parseTime :: [Char] -> Maybe Time
 parseTime t = validateInput t >>= parseTime'
@@ -66,8 +68,9 @@ timeDifference t1 t2@(h2, m2)
     toMinutes (h, m) = h * 60 + m -- how many minutes into the day we are
     toTime t = divMod t 60 -- minutes back to hours + minutes
 
-reportElapsed' (h, m) = "Time elapsed: " ++ show h ++ "h" ++ show m ++ "m"
-reportElapsed t1 t2 = reportElapsed' $ timeDifference t1 t2
+reportElapsed :: Time -> Time -> String
+reportElapsed t1 t2 = printf "Time elapsed: %02dh %02dm" h m
+  where (h, m) = timeDifference t1 t2
 
 formatReport Nothing _ = "Invalid start time"
 formatReport _ Nothing = "Invalid end time"
