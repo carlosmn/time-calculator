@@ -82,11 +82,19 @@ getInput s = do
   hFlush stdout
   getLine
 
+-- |If given Nothing, restart the main loop
+restartOnError Nothing = do
+  putStrLn "Invalid input"
+  main
+restartOnError _ = return ()
+
 main :: IO ()
 main = do
   s1 <- getInput "> "
   let t1 = parseTime s1
-  s2 <- getInput "> "
+  restartOnError t1
+  s2 <- getInput "→ "
   let t2 = parseTime s2
+  restartOnError t2
   putStrLn $ formatReport t1 t2
   main
